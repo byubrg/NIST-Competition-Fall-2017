@@ -22,6 +22,6 @@ echo "Setting up environment"
 cd $minicondaPath
 source activate skikitLearn_env 
 cd ../../..
-
+python classify_trees.py
 python mergePixels.py $MLPGenusOut $finalGenusOut "Genus"
 python mergePixels.py $MLPSpecisOut $finalSpeciesOut "Species"
