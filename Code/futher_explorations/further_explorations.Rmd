@@ -1,0 +1,137 @@
+---
+title: "further_explorations"
+author: "Rex Sumsion"
+date: "8/31/2018"
+output: html_document
+---
+
+```{r, reading_files}
+mlp_gen_pred <- read.csv("merged_mlp_genus.csv")
+mlp_sp_pred <- read.csv("merged_mlp_species.csv")
+rf_gen_pred <- read.csv("merged_RF_genus.csv")
+rf_sp_pred <- read.csv("merged_RF_species.csv")
+svm_gen_pred <- read.csv("merged_SVM_genus.csv")
+svm_sp_pred <- read.csv("merged_SVM_species.csv")
+sp_actual <- read.csv("sp_test.csv", sep = "\t")
+gen_actual <- read.csv("genus_test.csv", sep = "\t")
+```
+
+```{r}
+library(tidyverse)
+
+get_species_info <- function(merged_species, sp_test) {
+  d <-
+    merged_species %>%
+    group_by(Crown_id) %>%
+    summarise(Probability = max(Probability)) %>%
+    left_join(merged_species) %>%
+    left_join(sp_test) %>%
+    mutate(Correct = (Species == Actual))
+  
+  compare <-
+    d %>%
+    group_by(Actual, Species) %>%
+    count()
+  
+  correct <- d %>%
+    group_by(Actual) %>%
+    summarise(Correct = mean(Correct))
+  
+  return(list(compare = compare, correct = correct))
+}
+
+
+
+get_genus_info <- function(merged_genus, gen_test) {
+  d <- 
+    merged_genus %>%
+    group_by(Crown_id) %>%
+    summarise(Probability = max(Probability)) %>%
+    left_join(merged_genus) %>%
+    left_join(gen_test) %>%
+    mutate(Correct = (Genus == Actual)) 
+
+  compare <-
+    d %>%
+    group_by(Actual, Genus) %>%
+    count()
+  
+  correct <- d %>%
+    group_by(Actual) %>%
+    summarise(Correct = mean(Correct))
+  
+  return(list(compare = compare, correct = correct))
+}
+
+```
+
+
+```{r}
+mlp_gen_info <- get_genus_info(mlp_gen_pred, gen_actual)
+mlp_sp_info <- get_species_info(mlp_sp_pred, sp_actual)
+rf_gen_info <- get_genus_info(rf_gen_pred, gen_actual)
+rf_sp_info <- get_species_info(rf_sp_pred, sp_actual)
+svm_gen_info <- get_genus_info(svm_gen_pred, gen_actual)
+svm_sp_info <- get_species_info(svm_sp_pred, sp_actual)
+
+
+correct_sp <- full_join(svm_sp_info$correct, rf_sp_info$correct, by = "Actual") %>%
+  full_join(mlp_sp_info$correct, by = "Actual") %>%
+  rename(SVM = Correct.x, RF = Correct.y, MLP = Correct)
+compare_sp <- full_join(svm_sp_info$compare, rf_sp_info$compare, by = c("Actual", "Species")) %>%
+  full_join(mlp_sp_info$compare, by = c("Actual", "Species")) %>%
+  rename(SVM = n.x, RF = n.y, MLP = n)
+
+correct_gen <- full_join(svm_gen_info$correct, rf_gen_info$correct, by = "Actual") %>%
+  full_join(mlp_gen_info$correct, by = "Actual") %>%
+  rename(SVM = Correct.x, RF = Correct.y, MLP = Correct)
+compare_gen <- full_join(svm_gen_info$compare, rf_gen_info$compare, by = c("Actual", "Genus")) %>%
+  full_join(mlp_gen_info$compare, by = c("Actual", "Genus")) %>%
+  rename(SVM = n.x, RF = n.y, MLP = n)
+
+library(reshape2)
+tidy_correct_sp <-
+  correct_sp %>%
+  melt()
+
+tidy_compare_sp <-
+  compare_sp %>%
+  melt()
+
+tidy_correct_gen <-
+  correct_gen %>%
+  melt()
+
+tidy_compare_gen <-
+  compare_gen %>%
+  melt()
+```
+
+```{r}
+library(ggplot2)
+correct_graph <- function(d, type, amount, text_size, plot_title) {
+  ggplot(d, aes(x=Actual, y=value, fill=factor(variable))) +
+    geom_bar(stat="identity", position="dodge", colour="black") +
+    labs(x = type, y = "Accuracy", title = plot_title) +
+    guides(fill=guide_legend(title="Algorithms")) +
+    geom_text(aes(fill=variable, label=round(value, 1)), color = rep(c("white","black","black"), amount), position=position_dodge(width=0.9), vjust=2, size = text_size) +
+    geom_text(aes(fill=variable, label=variable), color= rep(c("white","black","black"), amount), position=position_dodge(width=.9), vjust=5, size = text_size) +
+    scale_fill_manual("legend", values = c("MLP" = "#000270", "RF" = "#c0d4e0", "SVM" = "#c0d4e0")) +
+    theme_classic() +
+    theme(axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          axis.line.y=element_blank(),
+          plot.title = element_text(hjust = 0.5, size=19, face="bold"),
+          legend.position="none",
+          axis.text.x=element_text(size=14),
+          axis.title=element_text(size=16,face="bold"))
+}
+
+correct_sp_graph <- correct_graph(tidy_correct_sp, "Species", 9, 2, "Accuracy of Algorithms Across Species")
+correct_gen_graph <- correct_graph(tidy_correct_gen, "Genus", 5, 4, "Accuracy of Algorithms Across Genus")
+
+ggsave("accuracy_species_graph.png", correct_sp_graph, width = 7, height = 5)
+ggsave("accuracy_genus_graph.png", correct_gen_graph, width = 7, height = 5)
+```
+
+
