@@ -9,7 +9,7 @@ from copy import copy, deepcopy
 import numpy as np
 #import pandas as pd
 
-def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id):
+def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id,titles, crown_ids):
     scaler = StandardScaler()
     scaler.fit(X_train)
     X_train = scaler.transform(X_train)
@@ -20,16 +20,23 @@ def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id):
 
     mlp.fit(X_train,y_train)
     predictions = mlp.predict(X_test)
-    #y_prob = mlp.predict_proba(X_test)
+    y_prob = mlp.predict_proba(X_test)
 #    RF.fit(X_train, y_train)
 #    predictions = RF.predict(X_test)
 #    y_prob = RF.predict_proba(X_test)
 #    y_prob = RF.predict_log_proba(X_test)
+#    y_prob = np.array(y_prob, dtype = np.unicode_)
+    y_prob = np.concatenate((np.array([titles]), y_prob), axis = 0)
+    print(f"y_prob: {y_prob.shape}")
+    print(f"crown_ids: {crown_ids.shape}")
+    y_prob = np.concatenate((crown_ids, y_prob), axis = 1)
+    y_prob = np.concatenate((y_prob, ([[""]]*1709)), axis = 1)
 
-#    print(y_prob)
 #    print(y_prob.shape)
+    np.savetxt(outfile,y_prob,delimiter = "\t", fmt = "%s")
 #    y_prob.tofile(outfile, "\t", format="%s")
 #    np.savetxt(outfile, y_prob, delimiter='\t')
+#    print(y_prob)
 
 #    X_Val = np.concatenate((X_train,X_test),axis=0)
 #    Y_Val = np.concatenate((y_train,y_test),axis=0)
@@ -46,12 +53,13 @@ def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id):
 #    scores = cross_val_score(svm1,X_Val, Y_Val)
 #    print(scores.mean())
 
-    return mlp
+#    return mlp
 
 
 def predict(mlp1,mlp2,species,genuss):
     #prepate the date
     input_file = open('tmp/hyper_bands_test.csv','r')
+
     hyperbands = []
     iteration = 0
     first = True
@@ -68,12 +76,14 @@ def predict(mlp1,mlp2,species,genuss):
         X.append([float(i) for i in row[2:]])
         pixel_and_crown_id.append(row[:2])
 
-    predictions1 = mlp1.predict(X)
-    predictions2 = mlp2.predict(X)
+#    predictions1 = mlp1.predict(X)
+#    predictions2 = mlp2.predict(X)
     outfile = open('gen.csv','w')
     outfile2 = open('species.csv','w')
-    probs1 = mlp1.predict_proba(X)
-    probs2 = mlp2.predict_proba(X)
+#    probs1 = mlp1.predict_proba(X)
+#    probs2 = mlp2.predict_proba(X)
+    probs1 = mlp1 
+    probs2 = mlp2
     line = 'crown_id\t'
     for s in genuss:
         line = line + s + '\t'
@@ -92,7 +102,6 @@ def predict(mlp1,mlp2,species,genuss):
         for item in probs2[i]:
             line = line + str(item) + '\t'
         outfile2.write(line + '\n')
-
 
 training_data_file = open('tmp/hyper_bands_train.csv','r')
 specied_id_file = open('tmp/species_id_train.csv','r')
@@ -113,18 +122,20 @@ for line in specied_id_file:
 
 first = True
 iteration = 0
+crown_ids = []#[["crown_id"]]
 for line in training_data_file:
     if first:
         first = False
         continue
     row = line.rstrip().split(',')
+    crown_ids.append([row[0]])
 
     answers.append( id_dictionary.get( row[0] ) )
     row.append(iteration) #Adjust this
     row.insert(0,iteration)
     hyperbands.append(row)
     iteration = iteration + 1
-
+crown_ids = np.array(crown_ids)
 
 X = hyperbands
 y = answers
@@ -137,7 +148,16 @@ for row in answers:
         genuss.append(row[1])
 species = sorted(species)
 genuss = sorted(genuss)
+print(f"y: {np.array(y).shape}")
+print(f"crown_ids: {crown_ids.shape}")
+
+y = np.concatenate((y,crown_ids), axis = 1)
 X_train, X_test, y_train, y_test = train_test_split(X, y)
+crown_ids_test = y_test[:,2]
+crown_ids_test.shape = (1708,1)
+crown_ids_test = np.concatenate(([["crown_ids"]],crown_ids_test), axis = 0)
+print(f"y_test: {crown_ids_test}")
+
 y_gen_train = []
 y_sp_train = []
 y_gen_test = []
@@ -160,8 +180,21 @@ for row in X_test:
     del row[0:2]
 
 
-mlp1 = classify('graphs/species_rf.csv',X_train,X_test,y_sp_train,y_sp_test,X_test_with_id)
-mlp2 = classify('graphs/genus_rf.csv',X_train,X_test,y_gen_train,y_gen_test,X_test_with_id)
+mlp1 = classify('futher_explorations/genus.csv',X_train,X_test,y_sp_train,y_sp_test,X_test_with_id,genuss, crown_ids_test)
+mlp2 = classify('futher_explorations/species.csv',X_train,X_test,y_gen_train,y_gen_test,X_test_with_id,species, crown_ids_test)
 
-predict(mlp1,mlp2,species,genuss)
+# for some reason the original code has sp and genus backwards
+gen_test = np.concatenate((["genus_test"],y_sp_test))
+sp_test = np.concatenate((["species_test"],y_gen_test))
 
+gen_test.shape = (1709, 1)
+sp_test.shape = (1709, 1)
+print(f"shape of sp: {sp_test.shape}")
+print(f"shape of crown: {crown_ids_test.shape}")
+# also add the associated crown ids
+gen_test = np.concatenate((crown_ids_test,gen_test), axis = 1)
+sp_test = np.concatenate((crown_ids_test,sp_test), axis = 1)
+
+print(f"species: {sp_test}")
+np.savetxt("futher_explorations/genus_test.csv",gen_test,delimiter = "\t", fmt = "%s")
+np.savetxt("futher_explorations/sp_test.csv",gen_test,delimiter = "\t", fmt = "%s")

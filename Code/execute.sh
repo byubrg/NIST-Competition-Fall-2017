@@ -15,13 +15,27 @@ MLPSpecisOut=$redirectedTempFolder/species.csv
 finalGenusOut=genus_id_subm.csv
 finalSpeciesOut=species_id_subm.csv
 
+#Explorations
+exploreFolder=futher_explorations
+genusExploration=$exploreFolder/genus.csv
+speciesExploration=$exploreFolder/species.csv
+mergedGenusExploration=$exploreFolder/merged_genus.csv
+mergedSpeciesExploration=$exploreFolder/merged_species.csv
+
 mkdir -p $redirectedTempFolder
 
 #miniconda environment is used to store skikitlearn_env
 echo "Setting up environment"
-cd $minicondaPath
-source activate skikitLearn_env 
-cd ../../..
-python classify_trees.py
-python mergePixels.py $MLPGenusOut $finalGenusOut "Genus"
-python mergePixels.py $MLPSpecisOut $finalSpeciesOut "Species"
+#cd $minicondaPath
+#source activate skikitLearn_env 
+#cd ../../..
+
+## Making predictions
+#python classify_trees.py
+#python mergePixels.py $MLPGenusOut $finalGenusOut "Genus"
+#python mergePixels.py $MLPSpecisOut $finalSpeciesOut "Species"
+
+# Futher explorations
+python explore.py
+python mergePixels.py $genusExploration $mergedGenusExploration "Genus"
+python mergePixels.py $speciesExploration $mergedSpeciesExploration "Species"

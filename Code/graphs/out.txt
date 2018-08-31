@@ -1,0 +1,7 @@
+Algorithm	Classification Type	Accuracy
+MultiLayer Perceptron	Species	0.95872335688
+Random Forest	Species	0.911432257811
+Support Vector Machine	Species	0.93500310135
+MultiLayer Perceptron	Genus	0.927089917303
+Random Forest	Genus	0.857714640141
+Support Vector Machine	Genus	0.867668634211
