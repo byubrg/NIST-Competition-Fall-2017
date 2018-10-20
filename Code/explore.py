@@ -25,14 +25,14 @@ def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id,titles, crow
     y_prob = np.concatenate((np.array([titles]), y_prob), axis = 0)
     y_prob = np.concatenate((crown_ids, y_prob), axis = 1)
     y_prob = np.concatenate((y_prob, ([[""]]*1709)), axis = 1)
-    np.savetxt(f"futher_explorations/mlp_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
-    #futher_explorations/species.csv
+    np.savetxt(f"further_explorations/mlp_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
+    #further_explorations/species.csv
     RF.fit(X_train, y_train)
     y_prob = RF.predict_proba(X_test)
     y_prob = np.concatenate((np.array([titles]), y_prob), axis = 0)
     y_prob = np.concatenate((crown_ids, y_prob), axis = 1)
     y_prob = np.concatenate((y_prob, ([[""]]*1709)), axis = 1)
-    np.savetxt(f"futher_explorations/rf_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
+    np.savetxt(f"further_explorations/rf_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
     #svm
     svm1.fit(X_train, y_train)
     y_prob = svm1.predict(X_test)
@@ -43,7 +43,7 @@ def classify(outfile, X_train, X_test,y_train,y_test,X_test_with_id,titles, crow
     y_prob = np.concatenate((np.array([titles]), y_prob), axis = 0)
     y_prob = np.concatenate((crown_ids, y_prob), axis = 1)
     y_prob = np.concatenate((y_prob, ([[""]]*1709)), axis = 1)
-    np.savetxt(f"futher_explorations/svm_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
+    np.savetxt(f"further_explorations/svm_{outfile}.csv",y_prob,delimiter = "\t", fmt = "%s")
 
 
 
@@ -138,5 +138,5 @@ sp_test.shape = (1709, 1)
 gen_test = np.concatenate((crown_ids_test,gen_test), axis = 1)
 sp_test = np.concatenate((crown_ids_test,sp_test), axis = 1)
 
-np.savetxt("futher_explorations/genus_test.csv",gen_test,delimiter = "\t", fmt = "%s")
-np.savetxt("futher_explorations/sp_test.csv",sp_test,delimiter = "\t", fmt = "%s")
+np.savetxt("further_explorations/genus_test.csv",gen_test,delimiter = "\t", fmt = "%s")
+np.savetxt("further_explorations/sp_test.csv",sp_test,delimiter = "\t", fmt = "%s")

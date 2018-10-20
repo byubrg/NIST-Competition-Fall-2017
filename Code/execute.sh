@@ -16,7 +16,7 @@ finalGenusOut=genus_id_subm.csv
 finalSpeciesOut=species_id_subm.csv
 
 #Explorations
-exploreFolder=futher_explorations
+exploreFolder=further_explorations
 genusMLPExploration=$exploreFolder/mlp_genus.csv
 speciesMLPExploration=$exploreFolder/mlp_species.csv
 mergedMLPGenusExploration=$exploreFolder/merged_mlp_genus.csv
