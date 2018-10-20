@@ -28,6 +28,14 @@ get_species_info <- function(merged_species, sp_test) {
     left_join(sp_test) %>%
     mutate(Correct = (Species == Actual))
   
+  sp_counts <- 
+    sp_test$Actual %>%
+    table()
+
+  d <-
+    d %>%
+    mutate(Actual = map_chr(d$Actual, ~{paste0(.x, "\n(n=", sp_counts[[.x]], ")")}))
+  
   compare <-
     d %>%
     group_by(Actual, Species) %>%
@@ -50,6 +58,14 @@ get_genus_info <- function(merged_genus, gen_test) {
     left_join(merged_genus) %>%
     left_join(gen_test) %>%
     mutate(Correct = (Genus == Actual)) 
+  
+  gen_counts <- 
+    gen_test$Actual %>%
+    table()
+
+  d <-
+    d %>%
+    mutate(Actual = map_chr(d$Actual, ~{paste0(.x, "\n(n=", gen_counts[[.x]], ")")}))
 
   compare <-
     d %>%
@@ -74,6 +90,12 @@ rf_sp_info <- get_species_info(rf_sp_pred, sp_actual)
 svm_gen_info <- get_genus_info(svm_gen_pred, gen_actual)
 svm_sp_info <- get_species_info(svm_sp_pred, sp_actual)
 
+# sp_counts <- 
+#   sp_actual$Actual %>%
+#   table()
+# 
+# mlp_sp_info$correct %>%
+#   mutate(Actual = map_chr(mlp_sp_info$correct$Actual, ~{paste0(.x, "\n(n=", sp_counts[[.x]], ")")}))
 
 correct_sp <- full_join(svm_sp_info$correct, rf_sp_info$correct, by = "Actual") %>%
   full_join(mlp_sp_info$correct, by = "Actual") %>%
@@ -114,7 +136,7 @@ correct_graph <- function(d, type, amount, text_size, plot_title) {
     geom_bar(stat="identity", position="dodge", colour="black") +
     labs(x = type, y = "Accuracy", title = plot_title) +
     guides(fill=guide_legend(title="Algorithms")) +
-    geom_text(aes(fill=variable, label=round(value, 1)), color = rep(c("white","black","black"), amount), position=position_dodge(width=0.9), vjust=2, size = text_size) +
+    geom_text(aes(fill=variable, label=round(value, 2)), color = rep(c("white","black","black"), amount), position=position_dodge(width=0.9), vjust=2, size = text_size) +
     geom_text(aes(fill=variable, label=variable), color= rep(c("white","black","black"), amount), position=position_dodge(width=.9), vjust=5, size = text_size) +
     scale_fill_manual("legend", values = c("MLP" = "#000270", "RF" = "#c0d4e0", "SVM" = "#c0d4e0")) +
     theme_classic() +
@@ -132,6 +154,8 @@ correct_gen_graph <- correct_graph(tidy_correct_gen, "Genus", 5, 4, "Accuracy of
 
 ggsave("accuracy_species_graph.png", correct_sp_graph, width = 7, height = 5)
 ggsave("accuracy_genus_graph.png", correct_gen_graph, width = 7, height = 5)
+correct_sp_graph
+correct_gen_graph
 ```
 
 
