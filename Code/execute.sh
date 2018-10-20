@@ -44,13 +44,13 @@ echo "Setting up environment"
 #python mergePixels.py $MLPSpecisOut $finalSpeciesOut "Species"
 
 # Futher explorations
-python3 explore.py
+#python3 explore.py
 # MLP
-python3 mergePixels.py $genusMLPExploration $mergedMLPGenusExploration "Genus"
-python3 mergePixels.py $speciesMLPExploration $mergedMLPSpeciesExploration "Species"
+#python3 mergePixels.py $genusMLPExploration $mergedMLPGenusExploration "Genus"
+#python3 mergePixels.py $speciesMLPExploration $mergedMLPSpeciesExploration "Species"
 # RF
-python3 mergePixels.py $genusRFExploration $mergedRFGenusExploration "Genus"
-python3 mergePixels.py $speciesRFExploration $mergedRFSpeciesExploration "Species"
+#python3 mergePixels.py $genusRFExploration $mergedRFGenusExploration "Genus"
+#python3 mergePixels.py $speciesRFExploration $mergedRFSpeciesExploration "Species"
 # SVM 
-python3 mergePixels.py $genusSVMExploration $mergedSVMGenusExploration "Genus"
-python3 mergePixels.py $speciesSVMExploration $mergedSVMSpeciesExploration "Species"
+#python3 mergePixels.py $genusSVMExploration $mergedSVMGenusExploration "Genus"
+#python3 mergePixels.py $speciesSVMExploration $mergedSVMSpeciesExploration "Species"
