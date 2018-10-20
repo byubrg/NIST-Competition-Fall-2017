@@ -152,8 +152,8 @@ correct_graph <- function(d, type, amount, text_size, plot_title) {
 correct_sp_graph <- correct_graph(tidy_correct_sp, "Species", 9, 2, "Accuracy of Algorithms Across Species")
 correct_gen_graph <- correct_graph(tidy_correct_gen, "Genus", 5, 4, "Accuracy of Algorithms Across Genus")
 
-ggsave("accuracy_species_graph.png", correct_sp_graph, width = 7, height = 5)
-ggsave("accuracy_genus_graph.png", correct_gen_graph, width = 7, height = 5)
+ggsave("accuracy_species_graph.pdf", correct_sp_graph, width = 7, height = 5)
+ggsave("accuracy_genus_graph.pdf", correct_gen_graph, width = 7, height = 5)
 correct_sp_graph
 correct_gen_graph
 ```

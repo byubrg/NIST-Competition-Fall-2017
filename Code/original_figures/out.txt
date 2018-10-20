@@ -1,0 +1,7 @@
+Algorithm	Classification Type	Accuracy
+MLP	5 classifiers	0.95872335688
+RF	5 classifiers	0.911432257811
+SVM	5 classifiers	0.93500310135
+MLP	9 classifiers	0.927089917303
+RF	9 classifiers	0.857714640141
+SVM	9 classifiers	0.867668634211

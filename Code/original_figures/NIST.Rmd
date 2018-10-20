@@ -1,0 +1,36 @@
+---
+title: "NIST_Graphs"
+author: "Rex Sumsion"
+date: "2/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(ggplot2)
+results <- read_tsv("out.txt")
+results$`Classification Type`[which(results$`Classification Type` == "5 classifiers")] = "Genus"
+results$`Classification Type`[which(results$`Classification Type` == "9 classifiers")] = "Species"
+```
+
+
+```{R}
+ggplot(results, aes(results$`Classification Type`, results$Accuracy)) +   
+  geom_bar(aes(fill = results$Algorithm), position = "dodge",colour="black", stat="identity") +
+  labs(x = "Classification Type", y = "Accuracy", title = "Accuracy of Algorithms Based on Number of Classifiers") +
+  guides(fill=guide_legend(title="Algorithms")) +
+  geom_text(aes(fill=results$Algorithm, label=round(results$Accuracy, 3)), color = c("black","black","white","black", "black","white"), position=position_dodge(width=0.9), vjust=2) +
+  geom_text(aes(fill=results$Algorithm, label=results$Algorithm), color = c("black","black","white","black", "black","white"), position=position_dodge(width=.9), vjust=25, ) +
+  scale_fill_manual("legend", values = c("MLP" = "#000270", "RF" = "#c0d4e0", "SVM" = "#c0d4e0")) + #####0483e5#41a7e2
+  theme_classic() + 
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.line.y=element_blank(),
+        plot.title = element_text(hjust = 0.5, size=19, face="bold"),
+        legend.position="none",
+        axis.text.x=element_text(size=14),
+        axis.title=element_text(size=16,face="bold"))
+
+
+ggsave("Figure_2.pdf")
+```
